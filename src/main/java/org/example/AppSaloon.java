@@ -32,10 +32,18 @@ public class AppSaloon {
         doBet();
     }
 
+    private void round(){
+
+    }
+
+    public void liar(){
+
+    }
+
     private void doBet() {
         Scanner src = new Scanner(System.in);
         Bet lastBet = null;
-        int diceCount = players.size() * 5; // Total dice count available
+        int diceCount = players.size() * 5;
 
         for (int i = 0; i < players.size(); i++) {
             Player currentPlayer = players.get(i);
@@ -43,14 +51,12 @@ public class AppSaloon {
 
             if (currentPlayer.getName().startsWith("Бот")) {
                 while (!validBet) {
-                    int quantity = new Random().nextInt(6) + 1; // Random quantity from 1 to 6
-                    int faceValue = new Random().nextInt(6) + 1; // Random face value from 1 to 6
+                    int quantity = new Random().nextInt(diceCount) + 1;
+                    int faceValue = new Random().nextInt(6) + 1;
 
-                    if (quantity > 6) {
+                    if (quantity > diceCount) {
                         continue;
-                    } else if (lastBet != null && (quantity < lastBet.getQuantity() || faceValue < lastBet.getFaceValue())) {
-                        continue;
-                    } else {
+                    } else if (lastBet == null || quantity > lastBet.getQuantity() || faceValue > lastBet.getFaceValue()) {
                         lastBet = new Bet(currentPlayer, quantity, faceValue);
                         System.out.println(lastBet);
                         validBet = true;
