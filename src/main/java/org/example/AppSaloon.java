@@ -20,7 +20,7 @@ public class AppSaloon {
 
     private void initializePlayersDice() {
         for (Player player : players) {
-            for (int i = 0; i < 5; i++) {
+            for (var i = 0; i < 5; i++) {
                 Dice dice = new Dice();
                 player.addDice(dice);
             }
@@ -43,7 +43,7 @@ public class AppSaloon {
     private void doBet() {
         Scanner src = new Scanner(System.in);
         Bet lastBet = null;
-        int diceCount = players.size() * 5;
+        var diceCount = players.size() * 5;
 
         for (int i = 0; i < players.size(); i++) {
             Player currentPlayer = players.get(i);
@@ -51,8 +51,8 @@ public class AppSaloon {
 
             if (currentPlayer.getName().startsWith("Бот")) {
                 while (!validBet) {
-                    int quantity = new Random().nextInt(diceCount) + 1;
-                    int faceValue = new Random().nextInt(6) + 1;
+                    var quantity = new Random().nextInt(diceCount) + 1;
+                    var faceValue = new Random().nextInt(6) + 1;
 
                     if (quantity > diceCount) {
                         continue;
@@ -65,8 +65,8 @@ public class AppSaloon {
             } else {
                 while (!validBet) {
                     System.out.println(currentPlayer.getName() + ", введите количество кубиков и значение (например, '2 3'):");
-                    int quantity = src.nextInt();
-                    int faceValue = src.nextInt();
+                    var quantity = src.nextInt();
+                    var faceValue = src.nextInt();
 
                     if (quantity > diceCount) {
                         System.out.println("Нельзя поставить больше " + diceCount + " кубиков!");
