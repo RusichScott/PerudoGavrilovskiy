@@ -7,15 +7,19 @@ import java.util.Scanner;
 
 public class AppSaloon {
     private List<Player> players;
+    private CheckBet checkBet = new CheckBet();
+    private Bet lastBet = null;
+    private int maxDiceCount;
 
     public AppSaloon() {
         players = new ArrayList<>();
         players.add(new Player("Игрок 1"));
-        players.add(new Player("Бот 1"));
-        players.add(new Player("Бот 2"));
-        players.add(new Player("Бот 3"));
+        players.add(new BotPlayer("Бот 1"));
+        players.add(new BotPlayer("Бот 2"));
+        players.add(new BotPlayer("Бот 3"));
 
         initializePlayersDice();
+        maxDiceCount = players.size() * 5;
     }
 
     private void initializePlayersDice() {
@@ -28,75 +32,61 @@ public class AppSaloon {
     }
 
     public void startGame() {
-        displayPlayersDice();
-        doBet();
-    }
-
-    private void round(){
-
-    }
-
-    public void liar(){
-
+        while (players.size() > 1) {
+            displayPlayersDice();
+            doBet();
+        }
     }
 
     private void doBet() {
         Scanner src = new Scanner(System.in);
-        Bet lastBet = null;
         var diceCount = players.size() * 5;
 
-        for (int i = 0; i < players.size(); i++) {
-            Player currentPlayer = players.get(i);
-            boolean validBet = false;
-
-            if (currentPlayer.getName().startsWith("Бот")) {
-                while (!validBet) {
-                    var quantity = new Random().nextInt(diceCount) + 1;
-                    var faceValue = new Random().nextInt(6) + 1;
-
-                    if (quantity > diceCount) {
-                        continue;
-                    } else if (lastBet == null || quantity > lastBet.getQuantity() || faceValue > lastBet.getFaceValue()) {
-                        lastBet = new Bet(currentPlayer, quantity, faceValue);
-                        System.out.println(lastBet);
-                        validBet = true;
-                    }
-                }
+        for (Player currentPlayer : players) {
+            if (currentPlayer instanceof BotPlayer) {
+                placeBotBet(currentPlayer, diceCount);
             } else {
-                while (!validBet) {
-                    System.out.println(currentPlayer.getName() + ", введите количество кубиков и значение (например, '2 3'):");
-                    var quantity = src.nextInt();
-                    var faceValue = src.nextInt();
+                placeUserBet(src, currentPlayer, diceCount);
+            }
 
-                    if (quantity > diceCount) {
-                        System.out.println("Нельзя поставить больше " + diceCount + " кубиков!");
-                    } else if (faceValue > 6) {
-                        System.out.println("Нельзя поставить значение кубиков больше 6!");
-                    } else if (lastBet != null && (quantity < lastBet.getQuantity() || faceValue < lastBet.getFaceValue())) {
-                        System.out.println("Ставка должна быть больше предыдущей ставки!");
-                    } else {
-                        lastBet = new Bet(currentPlayer, quantity, faceValue);
-                        System.out.println(lastBet);
-                        validBet = true;
-                    }
-                }
+            System.out.print("Введите 'liar' для проверки ставки или 'ставка' для продолжения: ");
+            String action = src.next().toLowerCase();
+            if (action.equals("liar")) {
+                checkBet.handleLiar(currentPlayer, lastBet.getPlayer(), lastBet, players);
+                return;
             }
         }
+    }
 
-        src.close();
+    private void placeBotBet(Player currentPlayer, int diceCount) {
+        Random random = new Random();
+        int quantity = random.nextInt(diceCount) + 1;
+        int faceValue = random.nextInt(6) + 1;
+        lastBet = new Bet(currentPlayer, quantity, faceValue);
+        System.out.println(currentPlayer.getName() + " ставит " + quantity + " кубика(-ов) со значением " + faceValue);
+    }
+
+    private void placeUserBet(Scanner src, Player currentPlayer, int diceCount) {
+        while (true) {
+            System.out.println(currentPlayer.getName() + ", введите количество кубиков и значение (например, '2 3'):");
+            int quantity = src.nextInt();
+            int faceValue = src.nextInt();
+            if (quantity <= diceCount && faceValue <= 6) {
+                lastBet = new Bet(currentPlayer, quantity, faceValue);
+                System.out.println(currentPlayer.getName() + " ставит " + quantity + " кубика(-ов) со значением " + faceValue);
+                break;
+            }
+            System.out.println("Неверная ставка. Попробуйте снова.");
+        }
     }
 
     private void displayPlayersDice() {
         for (Player player : players) {
-            if (!player.getName().startsWith("Бот")) {
-                System.out.print(player.getName() + " бросает кубики: ");
-                List<Dice> diceList = player.getDiceList();
-                for (Dice dice : diceList) {
-                    System.out.print(dice.getValue() + " ");
-                }
-                System.out.println();
+            System.out.print(player.getName() + " бросает кубики: ");
+            for (Dice dice : player.getDiceList()) {
+                System.out.print(dice.getValue() + " ");
             }
+            System.out.println();
         }
-        System.out.println("Боты бросили кубики.");
     }
 }

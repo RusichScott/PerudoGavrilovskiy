@@ -11,7 +11,7 @@ public class Bet {
         this.faceValue = faceValue;
     }
 
-    private Player getPlayer() {
+    public Player getPlayer() {
         return player;
     }
 
@@ -21,10 +21,5 @@ public class Bet {
 
     public int getFaceValue() {
         return faceValue;
-    }
-
-    @Override
-    public String toString() {
-        return player.getName() + " ставит " + quantity + " кубика(-ов) со значением  " + faceValue;
     }
 }
