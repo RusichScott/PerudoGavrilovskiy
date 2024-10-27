@@ -10,6 +10,9 @@ public class Player {
     public Player(String name) {
         this.name = name;
         this.diceList = new ArrayList<>();
+        for (int i = 0; i < 5; i++) {
+            addDice(new Dice());
+        }
     }
 
     public String getName() {
@@ -24,17 +27,14 @@ public class Player {
         return diceList;
     }
 
-    public List<Integer> getDiceValues() {
-        List<Integer> values = new ArrayList<>();
-        for (Dice dice : diceList) {
-            values.add(dice.getValue());
-        }
-        return values;
-    }
-
     public void removeDie() {
         if (!diceList.isEmpty()) {
             diceList.remove(diceList.size() - 1);
         }
     }
+
+    public boolean hasDice() {
+        return !diceList.isEmpty();
+    }
 }
+

@@ -22,4 +22,9 @@ public class Bet {
     public int getFaceValue() {
         return faceValue;
     }
+
+    @Override
+    public String toString() {
+        return quantity + " " + faceValue + " (от " + player.getName() + ")";
+    }
 }
