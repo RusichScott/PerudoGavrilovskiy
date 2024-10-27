@@ -7,8 +7,9 @@ import java.util.Scanner;
 public class Round {
     private List<Player> players;
     private int currentPlayerIndex;
-    private Scanner scanner;
+    private Bet lastBet;
     private CheckBet checkBet;
+    private Scanner scanner;
 
     public Round(List<Player> players, int currentPlayerIndex, Scanner scanner) {
         this.players = players;
@@ -18,52 +19,75 @@ public class Round {
     }
 
     public int playRound(boolean isMaputa) {
-        Bet lastBet = null;
-        boolean roundContinues = true;
+        lastBet = null;
+        boolean liarCalled = false;
+        int initialPlayerIndex = currentPlayerIndex;
 
-        while (roundContinues) {
+        while (!liarCalled) {
             Player currentPlayer = players.get(currentPlayerIndex);
             System.out.println("\nХодит: " + currentPlayer.getName() + " (кубиков осталось: " + currentPlayer.getDiceList().size() + ")");
 
             if (currentPlayer instanceof BotPlayer) {
-                handleBotTurn((BotPlayer) currentPlayer, lastBet, isMaputa);
+                liarCalled = handleBotTurn((BotPlayer) currentPlayer, isMaputa);
             } else {
-                handleUserTurn(currentPlayer, lastBet, isMaputa);
+                liarCalled = handlePlayerTurn((UserPlayer) currentPlayer, currentPlayerIndex != initialPlayerIndex, isMaputa);
             }
 
-            if (roundContinues) {
+            if (!liarCalled) {
                 currentPlayerIndex = (currentPlayerIndex + 1) % players.size();
             }
+
+            if (!liarCalled && currentPlayerIndex == initialPlayerIndex) {
+                System.out.println("Автоматический вызов 'Liar' последним игроком!");
+                checkBet.handleLiar(players.get(currentPlayerIndex), lastBet.getPlayer(), lastBet, players);
+                liarCalled = true;
+            }
         }
-        return currentPlayerIndex;
+        return (initialPlayerIndex + 1) % players.size();
     }
 
-    private void handleBotTurn(BotPlayer bot, Bet lastBet, boolean isMaputa) {
+    private boolean handleBotTurn(BotPlayer bot, boolean isMaputa) {
         BotBetStrategy botBetStrategy = new BotBetStrategy();
-        if (new Random().nextInt(2) == 0 && lastBet != null) { // 50% шанс "liar"
+
+        if (lastBet != null && new Random().nextInt(2) == 0) {
             System.out.println(bot.getName() + " говорит: Liar!");
             checkBet.handleLiar(bot, lastBet.getPlayer(), lastBet, players);
+            return true;
         } else {
-            lastBet = botBetStrategy.placeBet(bot, lastBet, getTotalDiceCount(), isMaputa);
-            System.out.println("Ставка: " + lastBet);
+            Bet newBet = botBetStrategy.placeBet(bot, lastBet, getTotalDiceCount(), isMaputa);
+
+            lastBet = newBet;
+            System.out.println(bot.getName() + " делает ставку: " + lastBet);
+
+            return false;
         }
     }
 
-    private void handleUserTurn(Player user, Bet lastBet, boolean isMaputa) {
+    private boolean handlePlayerTurn(UserPlayer user, boolean canCallLiar, boolean isMaputa) {
         UserBetStrategy userBetStrategy = new UserBetStrategy(scanner);
-        if (lastBet != null) {
-            System.out.println("Введите 'liar' для проверки ставки или 'ставка' для продолжения:");
-            String action = scanner.next().toLowerCase();
-            if (action.equals("liar")) {
-                System.out.println(user.getName() + " говорит: Liar!");
-                checkBet.handleLiar(user, lastBet.getPlayer(), lastBet, players);
-            } else {
-                lastBet = userBetStrategy.placeBet(user, lastBet, getTotalDiceCount(), isMaputa);
-                System.out.println("Ставка: " + lastBet);
-            }
-        } else {
+
+        if (!canCallLiar) {
+            System.out.println(user.getName() + " делает первую ставку:");
             lastBet = userBetStrategy.placeBet(user, lastBet, getTotalDiceCount(), isMaputa);
             System.out.println("Ставка: " + lastBet);
+            return false;
+        }
+
+        while (true) {
+            System.out.println("Введите 'liar' для проверки ставки или 'ставка' для продолжения:");
+            String action = scanner.next().toLowerCase();
+
+            if (action.equals("liar") && lastBet != null) {
+                System.out.println(user.getName() + " говорит: Liar!");
+                checkBet.handleLiar(user, lastBet.getPlayer(), lastBet, players);
+                return true;
+            } else if (action.equals("ставка")) {
+                lastBet = userBetStrategy.placeBet(user, lastBet, getTotalDiceCount(), isMaputa);
+                System.out.println("Ставка: " + lastBet);
+                return false;
+            } else {
+                System.out.println("Некорректный ввод. Пожалуйста, введите 'liar' или 'ставка'.");
+            }
         }
     }
 

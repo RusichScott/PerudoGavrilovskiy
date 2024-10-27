@@ -8,7 +8,7 @@ public class AppSaloon {
     private List<Player> players;
     private int currentPlayerIndex;
     private boolean maputaAnnounced = false;
-    private Scanner scanner = new Scanner(System.in);
+    private Scanner scanner;
 
     public AppSaloon() {
         players = new ArrayList<>();
@@ -17,20 +17,23 @@ public class AppSaloon {
         players.add(new BotPlayer("Бот 2"));
         players.add(new BotPlayer("Бот 3"));
         currentPlayerIndex = 0;
+        scanner = new Scanner(System.in);
     }
 
     public void startGame() {
         System.out.println("Игра Perudo началась!");
-        while (players.size() > 2) {
+
+        while (players.size() > 1) {
             displayPlayersDice();
+
             if (shouldStartMaputaRound()) {
                 System.out.println("Maputa объявлена!");
                 MaputaRound maputaRound = new MaputaRound(players, currentPlayerIndex, scanner);
-                currentPlayerIndex = maputaRound.playMaputaRound(); // Используем новый метод
+                currentPlayerIndex = maputaRound.playMaputaRound();
                 maputaAnnounced = true;
             } else {
                 Round round = new Round(players, currentPlayerIndex, scanner);
-                currentPlayerIndex = round.playRound(false); // Используем обычный метод
+                currentPlayerIndex = round.playRound(false);
             }
             removePlayersWithoutDice();
         }
@@ -39,9 +42,9 @@ public class AppSaloon {
 
     private void displayPlayersDice() {
         players.forEach(player -> {
-            System.out.print(player.getName() + " бросает кубики: ");
-            player.getDiceList().forEach(dice -> System.out.print(dice.getValue() + " "));
-            System.out.println("(Осталось кубиков: " + player.getDiceList().size() + ")");
+            String diceInfo = (player instanceof BotPlayer) ? "(Осталось кубиков: " + player.getDiceList().size() + ")" :
+                    player.getDiceList().stream().map(dice -> String.valueOf(dice.getValue())).reduce((d1, d2) -> d1 + " " + d2).orElse("");
+            System.out.println(player.getName() + " бросает кубики: " + diceInfo);
         });
     }
 
@@ -57,8 +60,7 @@ public class AppSaloon {
         if (players.size() == 1) {
             System.out.println("Победитель: " + players.get(0).getName() + "! Поздравляем!");
         } else {
-            System.out.println("Игра завершена с двумя оставшимися игроками.");
-            System.out.println("Победители: " + players.get(0).getName() + " и " + players.get(1).getName());
+            System.out.println("Игра завершена. Победитель не выявлен.");
         }
     }
 }
