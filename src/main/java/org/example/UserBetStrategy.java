@@ -1,4 +1,5 @@
 package org.example;
+import java.util.InputMismatchException;
 import java.util.Scanner;
 
 public class UserBetStrategy {
@@ -19,12 +20,21 @@ public class UserBetStrategy {
                 faceValue = lastBet.getFaceValue();
             } else {
                 System.out.println(user.getName() + ", введите количество кубиков и значение (например, '2 3'):");
-                quantity = scanner.nextInt();
-                faceValue = scanner.nextInt();
+
+                try {
+                    quantity = scanner.nextInt();
+                    faceValue = scanner.nextInt();
+                } catch (InputMismatchException e) {
+                    System.out.println("Некорректный ввод. Пожалуйста, введите количество и значение кубиков числом.");
+                    scanner.nextLine();
+                    continue;
+                }
             }
 
             if (isValidBet(quantity, faceValue, diceCount, lastBet)) {
                 return new Bet(user, quantity, faceValue);
+            } else {
+                System.out.println("Некорректная ставка. Попробуйте снова.");
             }
         }
     }

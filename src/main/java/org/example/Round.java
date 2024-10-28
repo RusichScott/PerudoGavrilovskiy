@@ -30,7 +30,7 @@ public class Round {
             if (currentPlayer instanceof BotPlayer) {
                 liarCalled = handleBotTurn((BotPlayer) currentPlayer, isMaputa);
             } else {
-                liarCalled = handlePlayerTurn((UserPlayer) currentPlayer, currentPlayerIndex != initialPlayerIndex, isMaputa);
+                liarCalled = handlePlayerTurn((UserPlayer) currentPlayer, initialPlayerIndex != currentPlayerIndex, isMaputa);
             }
 
             if (!liarCalled) {

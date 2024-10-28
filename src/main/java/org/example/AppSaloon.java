@@ -1,29 +1,87 @@
 package org.example;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.Scanner;
 
 public class AppSaloon {
     private List<Player> players;
     private int currentPlayerIndex;
     private boolean maputaAnnounced = false;
-    private Scanner scanner;
+    private Scanner scanner = new Scanner(System.in);
+    private static final String[] NAME_BASE = {"Lion", "Wolf", "Eagle", "Tiger", "Shark", "Bear"};
 
     public AppSaloon() {
         players = new ArrayList<>();
-        players.add(new UserPlayer("Игрок 1"));
-        players.add(new BotPlayer("Бот 1"));
-        players.add(new BotPlayer("Бот 2"));
-        players.add(new BotPlayer("Бот 3"));
         currentPlayerIndex = 0;
-        scanner = new Scanner(System.in);
+    }
+
+    public void displayMenu() {
+        while (true) {
+            System.out.println("1. Начать игру");
+            System.out.println("2. Правила игры");
+            System.out.println("3. Выйти");
+            System.out.print("Выберите опцию: ");
+            String choice = scanner.nextLine();
+
+            switch (choice) {
+                case "1":
+                    setupGame();
+                    startGame();
+                    return;
+                case "2":
+                    displayRules();
+                    break;
+                case "3":
+                    System.out.println("Выход из игры.");
+                    return;
+                default:
+                    System.out.println("Некорректный выбор. Пожалуйста, выберите 1, 2 или 3.");
+                    break;
+            }
+        }
+    }
+
+    private void setupGame() {
+        System.out.println("Введите имя игрока или нажмите 'Enter' для автоматической генерации имени:");
+        String userName = scanner.nextLine();
+
+        if (userName.isEmpty()) {
+            userName = generateRandomName();
+            System.out.println("Ваше имя: " + userName);
+        }
+        players.add(new UserPlayer(userName));
+
+        for (int i = 1; i <= 3; i++) {
+            String botName = generateRandomName();
+            players.add(new BotPlayer(botName));
+        }
+    }
+
+    private void displayRules() {
+        try {
+            String rules = new String(Files.readAllBytes(Paths.get("rules.txt")));
+            System.out.println("\nПравила игры:\n" + rules);
+        } catch (IOException e) {
+            System.out.println("Не удалось загрузить правила. Убедитесь, что файл rules.txt находится в папке с игрой.");
+        }
+    }
+
+    private String generateRandomName() {
+        Random random = new Random();
+        String name = NAME_BASE[random.nextInt(NAME_BASE.length)];
+        int number = random.nextInt(100_000);
+        return name + number;
     }
 
     public void startGame() {
         System.out.println("Игра Perudo началась!");
-
         while (players.size() > 1) {
+            rollAllDice();
             displayPlayersDice();
 
             if (shouldStartMaputaRound()) {
@@ -36,15 +94,27 @@ public class AppSaloon {
                 currentPlayerIndex = round.playRound(false);
             }
             removePlayersWithoutDice();
+
+            if (currentPlayerIndex >= players.size()) {
+                currentPlayerIndex = 0;
+            }
         }
         announceWinner();
     }
 
+    private void rollAllDice() {
+        players.forEach(player -> player.getDiceList().forEach(Dice::roll));
+    }
+
     private void displayPlayersDice() {
         players.forEach(player -> {
-            String diceInfo = (player instanceof BotPlayer) ? "(Осталось кубиков: " + player.getDiceList().size() + ")" :
-                    player.getDiceList().stream().map(dice -> String.valueOf(dice.getValue())).reduce((d1, d2) -> d1 + " " + d2).orElse("");
-            System.out.println(player.getName() + " бросает кубики: " + diceInfo);
+            if (player instanceof BotPlayer) {
+                System.out.println(player.getName() + " бросает кубики. (Осталось кубиков: " + player.getDiceList().size() + ")");
+            } else {
+                System.out.print(player.getName() + " бросает кубики: ");
+                player.getDiceList().forEach(dice -> System.out.print(dice.getValue() + " "));
+                System.out.println("(Осталось кубиков: " + player.getDiceList().size() + ")");
+            }
         });
     }
 
@@ -59,8 +129,6 @@ public class AppSaloon {
     private void announceWinner() {
         if (players.size() == 1) {
             System.out.println("Победитель: " + players.get(0).getName() + "! Поздравляем!");
-        } else {
-            System.out.println("Игра завершена. Победитель не выявлен.");
         }
     }
 }
