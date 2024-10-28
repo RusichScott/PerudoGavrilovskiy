@@ -14,27 +14,19 @@ public class UserBetStrategy {
         int faceValue;
 
         while (true) {
-            if (isMaputa && lastBet != null) {
-                System.out.println(user.getName() + ", введите только количество кубиков для повышения:");
-                quantity = scanner.nextInt();
-                faceValue = lastBet.getFaceValue();
-            } else {
+            try {
                 System.out.println(user.getName() + ", введите количество кубиков и значение (например, '2 3'):");
+                quantity = scanner.nextInt();
+                faceValue = scanner.nextInt();
 
-                try {
-                    quantity = scanner.nextInt();
-                    faceValue = scanner.nextInt();
-                } catch (InputMismatchException e) {
-                    System.out.println("Некорректный ввод. Пожалуйста, введите количество и значение кубиков числом.");
-                    scanner.nextLine();
-                    continue;
+                if (isValidBet(quantity, faceValue, diceCount, lastBet)) {
+                    return new Bet(user, quantity, faceValue);
+                } else {
+                    System.out.println("Ставка должна увеличивать количество кубиков и не уменьшать значение кубика!");
                 }
-            }
-
-            if (isValidBet(quantity, faceValue, diceCount, lastBet)) {
-                return new Bet(user, quantity, faceValue);
-            } else {
-                System.out.println("Некорректная ставка. Попробуйте снова.");
+            } catch (InputMismatchException e) {
+                System.out.println("Некорректный ввод. Пожалуйста, введите два целых числа, например, '2 3'.");
+                scanner.nextLine();
             }
         }
     }
@@ -46,8 +38,8 @@ public class UserBetStrategy {
         } else if (faceValue > 6) {
             System.out.println("Нельзя поставить значение кубиков больше 6!");
             return false;
-        } else if (lastBet != null && (quantity <= lastBet.getQuantity() || (faceValue <= lastBet.getFaceValue() && !lastBet.equals(null)))) {
-            System.out.println("Ставка должна быть больше предыдущей!");
+        } else if (lastBet != null && (quantity <= lastBet.getQuantity() || faceValue < lastBet.getFaceValue())) {
+            System.out.println("Ставка должна увеличивать количество кубиков и не уменьшать значение кубика!");
             return false;
         }
         return true;
