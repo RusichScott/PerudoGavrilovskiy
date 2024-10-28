@@ -21,8 +21,14 @@ public class AppSaloon {
     }
 
     public void displayMenu() {
+        System.out.println("********************************");
+        System.out.println("**      Добро пожаловать      **");
+        System.out.println("**            в               **");
+        System.out.println("**         ПЕРУДО!            **");
+        System.out.println("********************************");
+
         while (true) {
-            System.out.println("1. Начать игру");
+            System.out.println("\n1. Начать игру");
             System.out.println("2. Правила игры");
             System.out.println("3. Выйти");
             System.out.print("Выберите опцию: ");
@@ -37,7 +43,7 @@ public class AppSaloon {
                     displayRules();
                     break;
                 case "3":
-                    System.out.println("Выход из игры.");
+                    System.out.println("Выход из игры. До встречи!");
                     return;
                 default:
                     System.out.println("Некорректный выбор. Пожалуйста, выберите 1, 2 или 3.");
@@ -47,7 +53,7 @@ public class AppSaloon {
     }
 
     private void setupGame() {
-        System.out.println("Введите имя игрока или нажмите 'Enter' для автоматической генерации имени:");
+        System.out.println("\nВведите имя игрока или нажмите 'Enter' для автоматической генерации имени:");
         String userName = scanner.nextLine();
 
         if (userName.isEmpty()) {
@@ -69,6 +75,7 @@ public class AppSaloon {
         } catch (IOException e) {
             System.out.println("Не удалось загрузить правила. Убедитесь, что файл rules.txt находится в папке с игрой.");
         }
+        System.out.println("*******************************");
     }
 
     private String generateRandomName() {
@@ -79,7 +86,10 @@ public class AppSaloon {
     }
 
     public void startGame() {
-        System.out.println("Игра Perudo началась!");
+        System.out.println("\n**************************************");
+        System.out.println("**       Игра Perudo началась!      **");
+        System.out.println("**************************************");
+
         while (players.size() > 1) {
             rollAllDice();
             displayPlayersDice();
@@ -127,8 +137,12 @@ public class AppSaloon {
     }
 
     private void announceWinner() {
+        System.out.println("\n*******************************");
         if (players.size() == 1) {
-            System.out.println("Победитель: " + players.get(0).getName() + "! Поздравляем!");
+            System.out.println("**   Победитель: " + players.get(0).getName() + "!   **");
+        } else {
+            System.out.println("**   Игра окончена без победителя   **");
         }
+        System.out.println("*******************************");
     }
 }
