@@ -3,10 +3,7 @@ package org.example;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.Scanner;
+import java.util.*;
 
 public class AppSaloon {
     private List<Player> players;
@@ -53,7 +50,7 @@ public class AppSaloon {
     }
 
     private void setupGame() {
-        System.out.println("\nВведите имя игрока или нажмите 'Enter' для автоматической генерации имени:");
+        System.out.println("Введите имя игрока или нажмите 'Enter' для автоматической генерации имени:");
         String userName = scanner.nextLine();
 
         if (userName.isEmpty()) {
@@ -66,6 +63,43 @@ public class AppSaloon {
             String botName = generateRandomName();
             players.add(new BotPlayer(botName));
         }
+
+        // Проводим жеребьёвку
+        determineFirstPlayer();
+    }
+
+    private void determineFirstPlayer() {
+        System.out.println("\n*******************************");
+        System.out.println("**      Начинаем жеребьёвку!      **");
+        System.out.println("*******************************");
+
+        Map<Player, Integer> rolls = new HashMap<>();
+        Random random = new Random();
+
+        for (Player player : players) {
+            int sum = 0;
+            System.out.print(player.getName() + " бросает 5 кубиков: ");
+            for (int i = 0; i < 5; i++) {
+                int roll = random.nextInt(6) + 1;
+                sum += roll;
+                System.out.print(roll + " ");
+            }
+            rolls.put(player, sum);
+            System.out.println("-> Сумма: " + sum);
+        }
+
+        Player firstPlayer = players.get(0);
+        int highestSum = rolls.get(firstPlayer);
+
+        for (Map.Entry<Player, Integer> entry : rolls.entrySet()) {
+            if (entry.getValue() > highestSum) {
+                highestSum = entry.getValue();
+                firstPlayer = entry.getKey();
+            }
+        }
+
+        currentPlayerIndex = players.indexOf(firstPlayer);
+        System.out.println("\n" + firstPlayer.getName() + " ходит первым в этом раунде с суммой " + highestSum + "!");
     }
 
     private void displayRules() {

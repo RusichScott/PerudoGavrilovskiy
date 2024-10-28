@@ -12,9 +12,18 @@ public class BotBetStrategy {
             faceValue = new Random().nextInt(6) + 1;
         } else {
             quantity = lastBet.getQuantity() + 1;
-            faceValue = isMaputa ? lastBet.getFaceValue() : new Random().nextInt(6) + 1;
+
+            if (isMaputa) {
+                faceValue = lastBet.getFaceValue();
+            } else {
+                faceValue = lastBet.getFaceValue();
+                if (faceValue < 6 && new Random().nextBoolean()) {
+                    faceValue++;
+                }
+            }
         }
 
+        System.out.println(bot.getName() + " делает ставку: " + quantity + " " + faceValue + " (от " + bot.getName() + ")");
         return new Bet(bot, quantity, faceValue);
     }
 }
