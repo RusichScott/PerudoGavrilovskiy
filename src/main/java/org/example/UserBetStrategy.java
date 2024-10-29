@@ -22,7 +22,7 @@ public class UserBetStrategy {
                 if (isValidBet(quantity, faceValue, diceCount, lastBet)) {
                     return new Bet(user, quantity, faceValue);
                 } else {
-                    System.out.println("Ставка должна увеличивать количество кубиков и не уменьшать значение кубика!");
+                    System.out.println("Ставка должна либо увеличить количество кубиков, либо увеличить номинал или оба.");
                 }
             } catch (InputMismatchException e) {
                 System.out.println("Некорректный ввод. Пожалуйста, введите два целых числа, например, '2 3'.");
@@ -38,10 +38,17 @@ public class UserBetStrategy {
         } else if (faceValue > 6) {
             System.out.println("Нельзя поставить значение кубиков больше 6!");
             return false;
-        } else if (lastBet != null && (quantity <= lastBet.getQuantity() || faceValue < lastBet.getFaceValue())) {
-            System.out.println("Ставка должна увеличивать количество кубиков и не уменьшать значение кубика!");
-            return false;
         }
-        return true;
+
+        if (lastBet == null) {
+            return true;
+        }
+
+        boolean quantityIncreased = quantity >= lastBet.getQuantity();
+        boolean faceValueIncreased = faceValue >= lastBet.getFaceValue();
+
+        return (quantity > lastBet.getQuantity() || faceValue > lastBet.getFaceValue())
+                && quantityIncreased && faceValueIncreased;
     }
 }
+

@@ -1,29 +1,40 @@
 package org.example;
 
-import java.util.Random;
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.example.Dice.random;
 
 public class BotBetStrategy {
+    private static final int MAX_FACE_VALUE = 6; // Максимальный номинал кубика
+
     public Bet placeBet(Player bot, Bet lastBet, int diceCount, boolean isMaputa) {
-        int quantity;
-        int faceValue;
+        Map<Integer, Integer> diceFrequency = new HashMap<>();
 
-        if (lastBet == null) {
-            quantity = new Random().nextInt(diceCount) + 1;
-            faceValue = new Random().nextInt(6) + 1;
-        } else {
-            quantity = lastBet.getQuantity() + 1;
-
-            if (isMaputa) {
-                faceValue = lastBet.getFaceValue();
-            } else {
-                faceValue = lastBet.getFaceValue();
-                if (faceValue < 6 && new Random().nextBoolean()) {
-                    faceValue++;
-                }
-            }
+        for (Dice dice : bot.getDiceList()) {
+            int value = dice.getValue();
+            diceFrequency.put(value, diceFrequency.getOrDefault(value, 0) + 1);
         }
 
-        System.out.println(bot.getName() + " делает ставку: " + quantity + " " + faceValue + " (от " + bot.getName() + ")");
+        int bestFaceValue = diceFrequency.entrySet()
+                .stream()
+                .max(Map.Entry.comparingByValue())
+                .map(Map.Entry::getKey)
+                .orElse(1);
+        int baseQuantity = diceFrequency.getOrDefault(bestFaceValue, 1);
+
+        int quantity = baseQuantity + random.nextInt(2) + 2;
+        if (lastBet != null) {
+            quantity = Math.max(lastBet.getQuantity() + 1, quantity);
+        }
+
+        int faceValue;
+        if (lastBet != null) {
+            faceValue = Math.min(Math.max(bestFaceValue, lastBet.getFaceValue() + 1), MAX_FACE_VALUE);
+        } else {
+            faceValue = Math.min(bestFaceValue, MAX_FACE_VALUE);
+        }
+
         return new Bet(bot, quantity, faceValue);
     }
 }

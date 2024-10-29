@@ -4,7 +4,7 @@ import java.util.Random;
 
 public class Dice {
     private int value;
-    private static final Random random = new Random();
+    protected static final Random random = new Random();
 
     public Dice() {
         roll();
