@@ -1,14 +1,22 @@
-package org.example;
+package BetStrategy;
+
+import Players.BotPlayer;
+import org.example.Bet;
+import org.example.Dice;
+import Players.Player;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import static org.example.Dice.random;
 
 public class BotBetStrategy {
-    private static final int MAX_FACE_VALUE = 6; // Максимальный номинал кубика
+    private static final int MAX_FACE_VALUE = 6;
+    private Random random = new Random();
 
-    public Bet placeBet(Player bot, Bet lastBet, int diceCount, boolean isMaputa) {
+    public Bet placeBet(BotPlayer bot, Bet lastBet, List<Bet> previousBets, int diceCount, boolean isMaputa) {
         Map<Integer, Integer> diceFrequency = new HashMap<>();
 
         for (Dice dice : bot.getDiceList()) {
@@ -25,16 +33,25 @@ public class BotBetStrategy {
 
         int quantity = baseQuantity + random.nextInt(2) + 2;
         if (lastBet != null) {
-            quantity = Math.max(lastBet.getQuantity() + 1, quantity);
+            quantity = Math.max(lastBet.getQuantity(), quantity + 1);
         }
 
         int faceValue;
         if (lastBet != null) {
-            faceValue = Math.min(Math.max(bestFaceValue, lastBet.getFaceValue() + 1), MAX_FACE_VALUE);
+            faceValue = Math.max(bestFaceValue, lastBet.getFaceValue());
         } else {
             faceValue = Math.min(bestFaceValue, MAX_FACE_VALUE);
         }
 
-        return new Bet(bot, quantity, faceValue);
+        Bet newBet = new Bet(bot, quantity, faceValue);
+        for (Bet bet : previousBets) {
+            if (bet.getQuantity() == newBet.getQuantity() && bet.getFaceValue() == newBet.getFaceValue()) {
+
+                newBet = new Bet(bot, newBet.getQuantity() + 1, newBet.getFaceValue());
+                break;
+            }
+        }
+
+        return newBet;
     }
 }

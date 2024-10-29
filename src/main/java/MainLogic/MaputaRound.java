@@ -1,4 +1,6 @@
-package org.example;
+package MainLogic;
+
+import Players.Player;
 
 import java.util.List;
 import java.util.Scanner;

@@ -1,6 +1,6 @@
-package org.example;
+package Players;
 
-class UserPlayer extends Player {
+public class UserPlayer extends Player {
     public UserPlayer(String name) {
         super(name);
     }

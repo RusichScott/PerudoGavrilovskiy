@@ -1,4 +1,6 @@
-package org.example;
+package Game;
+
+import MainLogic.AppSaloon;
 
 public class PerudoGame {
     public static void main(String[] args) {

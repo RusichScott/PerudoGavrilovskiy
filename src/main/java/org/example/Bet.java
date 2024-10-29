@@ -1,5 +1,7 @@
 package org.example;
 
+import Players.Player;
+
 public class Bet {
     private Player player;
     private int quantity;

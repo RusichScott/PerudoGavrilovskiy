@@ -1,4 +1,7 @@
-package org.example;
+package MainLogic;
+
+import Players.Player;
+import org.example.Bet;
 
 import java.util.List;
 

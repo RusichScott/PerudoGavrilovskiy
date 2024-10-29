@@ -1,4 +1,10 @@
-package org.example;
+package MainLogic;
+
+import Logs.GameLogger;
+import Players.Player;
+import Players.UserPlayer;
+import Players.BotPlayer;
+import org.example.Dice;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -6,6 +12,7 @@ import java.nio.file.Paths;
 import java.util.*;
 
 public class AppSaloon {
+    private GameLogger logger = new GameLogger("game_log.json");
     private List<Player> players;
     private int currentPlayerIndex;
     private boolean maputaAnnounced = false;
@@ -147,7 +154,10 @@ public class AppSaloon {
     }
 
     private void rollAllDice() {
-        players.forEach(player -> player.getDiceList().forEach(Dice::roll));
+        players.forEach(player -> {
+            player.getDiceList().forEach(Dice::roll);
+            logger.logDiceValues(player.getName(), player.getDiceList());
+        });
     }
 
     private void displayPlayersDice() {
@@ -163,7 +173,10 @@ public class AppSaloon {
     }
 
     private boolean shouldStartMaputaRound() {
-        return players.stream().anyMatch(player -> player.getDiceList().size() == 1 && !maputaAnnounced);
+        return players.stream().anyMatch(player ->
+                player.getDiceList().size() == 1 &&
+                        !player.hasDeclaredMaputa() &&
+                        !maputaAnnounced);
     }
 
     private void removePlayersWithoutDice() {

@@ -1,4 +1,7 @@
-package org.example;
+package BetStrategy;
+import org.example.Bet;
+import Players.Player;
+
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
