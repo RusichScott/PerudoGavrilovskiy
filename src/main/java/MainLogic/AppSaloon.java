@@ -56,7 +56,7 @@ public class AppSaloon {
         }
     }
 
-    private void setupGame() {
+    public void setupGame() {
         System.out.println("Введите имя игрока или нажмите 'Enter' для автоматической генерации имени:");
         String userName = scanner.nextLine();
 
@@ -183,7 +183,7 @@ public class AppSaloon {
         players.removeIf(player -> !player.hasDice());
     }
 
-    private void announceWinner() {
+    public void announceWinner() {
         System.out.println("\n*******************************");
         if (players.size() == 1) {
             System.out.println("**   Победитель: " + players.get(0).getName() + "!   **");
